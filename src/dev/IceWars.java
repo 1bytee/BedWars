@@ -22,6 +22,7 @@ public class IceWars extends JavaPlugin {
 
     public static final String PREFIX = "§c[IceWars] §7";
     public static GameState STATE = GameState.WARMUP;
+    public static int MAP = -1;
 
     @Getter
     private static IceWars instance;
@@ -70,6 +71,15 @@ public class IceWars extends JavaPlugin {
         getCommand("spawnwitch").setExecutor(new SpawnWitchCommand());
         getCommand("setteamspawn").setExecutor(new SetTeamSpawn());
         getCommand("seticeblock").setExecutor(new SetIceBlock());
+    }
+
+    public static Team getTeam(Player p) {
+        for (Team team : getTeams()) {
+            if (team.getPlayers().contains(p)) {
+                return team;
+            }
+        }
+        return null;
     }
 
     public Color getColor(Player p) {

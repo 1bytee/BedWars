@@ -45,4 +45,16 @@ public class Locations {
         saveConfiguration("locations", cfg);
     }
 
+    public static Location getSpawn(Team team) {
+        String path = IceWars.MAP + "." + team.getName() + ".";
+        File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
+        double x = cfg.getDouble(path + "X");
+        double y = cfg.getDouble(path + "Y");
+        double z = cfg.getDouble(path + "Z");
+        float yaw = NumberConversions.toFloat(cfg.get(path + "yaw"));
+        float pitch = NumberConversions.toFloat(cfg.get(path + "pitch"));
+        World world = Bukkit.getWorld(cfg.getString(path + "W"));
+        return new Location(world, x, y, z, yaw, pitch);
+    }
 }
