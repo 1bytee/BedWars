@@ -1,11 +1,11 @@
-package dev.api;
+package dev.util;
 
 import lombok.Getter;
 
 @Getter
 public enum TeamType {
 
-    T2x4, T2x1, T2x2, T3x2, T4x2, T4x3, T4x4, T8x1;
+    T2x4, T2x1, T2x2, T3x2, T4x2, T4x3, T4x4;
 
     private String type;
     private int amount;

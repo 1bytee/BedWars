@@ -1,4 +1,4 @@
-package dev.api;
+package dev.util;
 
 import org.bukkit.entity.Player;
 import ru.tehkode.permissions.PermissionUser;
@@ -6,6 +6,7 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class Ranks {
 
+    //TODO
     public static String getGroup(Player p) {
         return getAsPermissionUser(p).getParentIdentifiers().get(0);
     }

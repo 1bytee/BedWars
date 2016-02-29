@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
@@ -22,9 +21,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import static org.bukkit.Material.*;
-
 import java.util.List;
+
+import static org.bukkit.Material.*;
 
 public class WitchMenu implements Listener {
 
@@ -58,6 +57,14 @@ public class WitchMenu implements Listener {
 
     private ItemStack getItem(Material mat, String display) {
         ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(display);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private ItemStack getItem(Material mat, String display, int durability) {
+        ItemStack item = new ItemStack(mat, 1, (short) durability);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(display);
         item.setItemMeta(meta);
@@ -108,7 +115,19 @@ public class WitchMenu implements Listener {
                 } else if (e.getCurrentItem().getType() == IRON_CHESTPLATE) {
                     openArmor(p);
                 } else if (e.getCurrentItem().getType() == WOOD_PICKAXE) {
-
+                    openPickaxe(p);
+                } else if (e.getCurrentItem().getType() == IRON_SWORD) {
+                    openSwords(p);
+                } else if (e.getCurrentItem().getType() == BOW) {
+                    openBows(p);
+                } else if (e.getCurrentItem().getType() == APPLE) {
+                    openFood(p);
+                } else if (e.getCurrentItem().getType() == CHEST) {
+                    openChests(p);
+                } else if (e.getCurrentItem().getType() == POTION) {
+                    openPotions(p);
+                } else if (e.getCurrentItem().getType() == TNT) {
+                    openSpecial(p);
                 }
             }
         }
@@ -143,6 +162,94 @@ public class WitchMenu implements Listener {
 
     public void openPickaxe(Player p) {
         TradingInventory inv = new TradingInventory("§bPickaxes");
+        inv.addTrade(getItem(CLAY_BRICK, 4, "§cBronze"), getItem(Material.WOOD_PICKAXE, "§bWood Pickaxe",
+                Enchantments.builder().e(Enchantment.DIG_SPEED).l(1).build(),
+                Enchantments.builder().e(Enchantment.DURABILITY).l(1).build()
+        ));
+        inv.addTrade(getItem(IRON_INGOT, 2, "§7Silver"), getItem(Material.STONE_PICKAXE, "§bStone Pickaxe",
+                Enchantments.builder().e(Enchantment.DIG_SPEED).l(1).build(),
+                Enchantments.builder().e(Enchantment.DURABILITY).l(1).build()
+        ));
+        inv.addTrade(getItem(GOLD_INGOT, "§6Gold"), getItem(IRON_PICKAXE, "bIron Pickaxe",
+                Enchantments.builder().e(Enchantment.DIG_SPEED).l(3).build(),
+                Enchantments.builder().e(Enchantment.DURABILITY).l(1).build()
+        ));
+        inv.openTrade(p);
+    }
+
+    public void openSwords(Player p) {
+        TradingInventory inv = new TradingInventory("§bPickaxes");
+        inv.addTrade(getItem(CLAY_BRICK, 8, "§cBronze"), getItem(STICK, "§bKnockback Stick",
+                Enchantments.builder().e(Enchantment.KNOCKBACK).l(3).build()
+        ));
+        inv.addTrade(getItem(IRON_INGOT, "§7Silver"), getItem(GOLD_SWORD, "§bGold Sword Lvl 1",
+                Enchantments.builder().e(Enchantment.DAMAGE_ALL).l(1).build(),
+                Enchantments.builder().e(Enchantment.DURABILITY).l(1).build()
+        ));
+        inv.addTrade(getItem(IRON_INGOT, 3, "§7Silver"), getItem(GOLD_SWORD, "§bGold Sword Lvl 2",
+                Enchantments.builder().e(Enchantment.DAMAGE_ALL).l(2).build(),
+                Enchantments.builder().e(Enchantment.DURABILITY).l(1).build()
+        ));
+        inv.addTrade(getItem(GOLD_INGOT, 5, "§6Gold"), getItem(IRON_SWORD, "§bIron Sword",
+                Enchantments.builder().e(Enchantment.DAMAGE_ALL).l(3).build(),
+                Enchantments.builder().e(Enchantment.DURABILITY).l(1).build(),
+                Enchantments.builder().e(Enchantment.KNOCKBACK).l(1).build()
+        ));
+        inv.openTrade(p);
+    }
+
+    public void openBows(Player p) {
+        TradingInventory inv = new TradingInventory("§bBows");
+        inv.addTrade(getItem(GOLD_INGOT, 3, "§6Gold"), getItem(BOW, "§bBow Lvl 1",
+                Enchantments.builder().e(Enchantment.ARROW_INFINITE).l(1).build()
+        ));
+        inv.addTrade(getItem(GOLD_INGOT, 7, "§6Gold"), getItem(BOW, "§bBow Lvl 2",
+                Enchantments.builder().e(Enchantment.ARROW_DAMAGE).l(1).build(),
+                Enchantments.builder().e(Enchantment.ARROW_INFINITE).l(1).build()
+        ));
+        inv.addTrade(getItem(GOLD_INGOT, 13, "§6Gold"), getItem(BOW, "§bBow Lvl 3",
+                //NEIN
+                Enchantments.builder().e(Enchantment.ARROW_DAMAGE).l(1).build(),
+                Enchantments.builder().e(Enchantment.ARROW_KNOCKBACK).l(1).build(),
+                Enchantments.builder().e(Enchantment.ARROW_INFINITE).l(1).build()
+        ));
+        inv.addTrade(getItem(GOLD_INGOT, "§6Gold"), getItem(ARROW, "§bArrow"));
+        inv.openTrade(p);
+    }
+
+    public void openFood(Player p) {
+        TradingInventory inv = new TradingInventory("§cFood");
+        inv.addTrade(getItem(CLAY_BRICK, "§cBronze"), getItem(APPLE, "§cApple"));
+        inv.addTrade(getItem(CLAY_BRICK, 2, "§cBronze"), getItem(GRILLED_PORK, "§cCooked Porkchop"));
+        inv.addTrade(getItem(IRON_INGOT, "§7Silver"), getItem(CAKE, "§cCake"));
+        inv.addTrade(getItem(GOLD_INGOT, 2, "§6Gold"), getItem(GOLDEN_APPLE, "§cGolden Apple"));
+        inv.openTrade(p);
+    }
+
+    public void openChests(Player p) {
+        TradingInventory inv = new TradingInventory("§eChests");
+        inv.addTrade(getItem(IRON_INGOT, "§7Silver"), getItem(CHEST, "§eChest"));
+        inv.openTrade(p);
+    }
+
+    public void openPotions(Player p) {
+        TradingInventory inv = new TradingInventory("§cPotions");
+        inv.addTrade(getItem(IRON_INGOT, 3, "§7Silver"), getItem(POTION, "§cHealing Lvl 1", 16453));
+        inv.addTrade(getItem(IRON_INGOT, 5, "§7Silver"), getItem(POTION, "§cHealing Lvl 2", 16421));
+        inv.addTrade(getItem(IRON_INGOT, 7, "§7Silver"), getItem(POTION, "§cSpeed", 16386));
+        inv.openTrade(p);
+    }
+
+    public void openSpecial(Player p) {
+        TradingInventory inv = new TradingInventory("§cSpecial");
+        inv.addTrade(getItem(CLAY_BRICK, "§cBronze"), getItem(LADDER, "§cLadder"));
+        inv.addTrade(getItem(CLAY_BRICK, 16, "§cBronze"), getItem(WEB, "§cCobweb"));
+        inv.addTrade(getItem(IRON_INGOT, 5, "§7Silver"), getItem(FISHING_ROD, "§cFishing Rod"));
+        inv.addTrade(getItem(IRON_INGOT, 7, "§7Silver"), getItem(FLINT_AND_STEEL, "§cFlint And Steel"));
+        inv.addTrade(getItem(GOLD_INGOT, 3, "§6Gold"), getItem(TNT, "§cTNT"));
+        inv.addTrade(getItem(GOLD_INGOT, 13, "§6Gold"), getItem(ENDER_PEARL, "§cEnder Pearl"));
+        inv.addTrade(getItem(CLAY_BRICK, 64, "§cBronze"), getItem(MONSTER_EGG, "§cTNT Pig", 90));
+        inv.openTrade(p);
     }
 
     @Builder

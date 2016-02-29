@@ -1,4 +1,4 @@
-package dev.api;
+package dev.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

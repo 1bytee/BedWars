@@ -1,4 +1,4 @@
-package dev.api;
+package dev.util;
 
 import dev.IceWars;
 import lombok.SneakyThrows;
