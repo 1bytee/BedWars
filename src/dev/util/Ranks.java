@@ -1,18 +1,35 @@
 package dev.util;
 
+import com.google.common.collect.Maps;
+import com.mongodb.client.MongoCollection;
+import dev.IceWars;
+import org.bson.Document;
 import org.bukkit.entity.Player;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static com.mongodb.client.model.Filters.eq;
+
 public class Ranks {
+    private static final Map<Player, String> GROUP = Maps.newHashMap();
 
-    //TODO
     public static String getGroup(Player p) {
-        return getAsPermissionUser(p).getParentIdentifiers().get(0);
-    }
 
-    private static PermissionUser getAsPermissionUser(Player p) {
-        return PermissionsEx.getUser(p);
+        if (GROUP.containsKey(p)) {
+            return GROUP.get(p);
+        }
+
+        UUID uuid = IceWars.getUUID(p);
+        MongoCollection<Document> collection = MongoConnection.getCollection("perms", "users_in_groups");
+
+        String group = collection.find(eq("uuid", uuid.toString())).first().getString("group");
+        GROUP.put(p, group);
+
+        return group;
     }
 
     public static String getPrefix(Player p) {

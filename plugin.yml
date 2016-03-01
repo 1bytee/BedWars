@@ -1,0 +1,6 @@
+name: IceWars
+author: 1byte
+version: 1.0
+main: dev.IceWars
+
+commands:

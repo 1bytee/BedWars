@@ -2,6 +2,7 @@ package dev.util;
 
 import com.google.common.collect.Lists;
 import dev.IceWars;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.util.List;
 
 @Getter
+@EqualsAndHashCode(callSuper = false, exclude = {"players", "iceBlock"})
 public class Team {
 
     private List<Player> players;
@@ -33,8 +35,8 @@ public class Team {
         }
     }
 
-    public Location getSpawn() {
-        return null;
+    public void removePlayer(Player p) {
+        players.remove(p);
     }
 
     public void sendMessage(String message) {

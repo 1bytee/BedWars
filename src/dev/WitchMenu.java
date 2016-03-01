@@ -253,9 +253,8 @@ public class WitchMenu implements Listener {
     }
 
     @Builder
-    @NoArgsConstructor
     @Getter
-    private class Enchantments {
+    private static class Enchantments {
 
         private Enchantment e;
         private int l;
