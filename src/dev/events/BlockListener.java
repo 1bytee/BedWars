@@ -22,6 +22,9 @@ public class BlockListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
+        if (IceWars.SETUPMODE)
+            return;
+
         Player p = e.getPlayer();
         Material mat = e.getBlock().getType();
         if (IceWars.STATE != GameState.INGAME) {

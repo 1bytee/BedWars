@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dev.tntpig.TNTPigExecutor;
+import dev.tntpig.TNTPigRegister;
 import dev.commands.*;
 import dev.events.BlockListener;
 import dev.events.PlayerListener;
@@ -51,6 +53,8 @@ public class IceWars extends JavaPlugin {
     public static final List<Player> INGAME = Lists.newArrayList();
     public static final List<Player> SPECTATING = Lists.newArrayList();
     public static AbstractTask CURRENT_TASK;
+
+    public static TNTPigRegister REGISTER = new TNTPigRegister();
 
     @Getter
     private static IceWars instance;
@@ -150,6 +154,7 @@ public class IceWars extends JavaPlugin {
         pm.registerEvents(new SpectatorListener(), this);
         pm.registerEvents(new SpectatorListener.SpectatorCompass(), this);
         pm.registerEvents(new TeamSelector(), this);
+        pm.registerEvents(new TNTPigExecutor(), this);
     }
 
     private void registerCommands() {
