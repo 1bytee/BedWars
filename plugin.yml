@@ -4,3 +4,13 @@ version: 1.0
 main: dev.IceWars
 
 commands:
+    seticeblock:
+        description: set iceblock
+    setlobbyspawn:
+        description: set lobby spawn
+    setteamspawn:
+        description: set team spawn
+    spawnwitch:
+        description: spawn a witch
+    world:
+        description: switch worlds

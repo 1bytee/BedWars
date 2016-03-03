@@ -14,13 +14,15 @@ public class Scoreboards {
         admin.setPrefix("§7[ADMIN] §4");
         Team developer = board.registerNewTeam("2developer");
         developer.setPrefix("§7[DEV] §b");
-        Team moderator = board.registerNewTeam("3moderator");
+        Team srmoderator = board.registerNewTeam("3srmoderator");
+        srmoderator.setPrefix("§7[SRMOD] §e");
+        Team moderator = board.registerNewTeam("4moderator");
         moderator.setPrefix("§7[MOD] §e");
-        Team vip = board.registerNewTeam("4vip");
+        Team vip = board.registerNewTeam("5vip");
         vip.setPrefix("§7[VIP] §5");
-        Team premium = board.registerNewTeam("5premium");
+        Team premium = board.registerNewTeam("6premium");
         premium.setPrefix("§6");
-        Team user = board.registerNewTeam("6user");
+        Team user = board.registerNewTeam("7user");
         user.setPrefix("§7");
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -29,8 +31,10 @@ public class Scoreboards {
                 admin.addEntry(player.getName());
             else if (color.equals("§b"))
                 developer.addEntry(player.getName());
-            else if (color.equals("§e"))
+            else if (color.equals("§e") && Ranks.getGroup(player).equalsIgnoreCase("moderator"))
                 moderator.addEntry(player.getName());
+            else if (color.equals("§e") && Ranks.getGroup(player).equalsIgnoreCase("srmoderator"))
+                srmoderator.addEntry(player.getName());
             else if (color.equals("§5"))
                 vip.addEntry(player.getName());
             else if (color.equals("§6"))

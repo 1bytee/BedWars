@@ -4,7 +4,10 @@ import com.google.common.collect.Lists;
 import dev.IceWars;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -47,7 +50,7 @@ public class Team {
         return iceBlock.getType() == Material.ICE;
     }
 
-    private String firstCharUppercase(String string) {
+    private static String firstCharUppercase(String string) {
         return Character.toUpperCase(string.charAt(0)) + string.substring(1, string.length());
     }
 

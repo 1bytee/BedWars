@@ -8,6 +8,7 @@ import dev.commands.*;
 import dev.events.BlockListener;
 import dev.events.PlayerListener;
 import dev.events.SpectatorListener;
+import dev.map.MapManager;
 import dev.map.MapReset;
 import dev.task.AbstractTask;
 import dev.task.WarmupTask;
@@ -43,11 +44,13 @@ public class IceWars extends JavaPlugin {
     public static final String PREFIX = "§c[IceWars] §7";
     public static String SERVER;
     public static GameState STATE = GameState.WARMUP;
-    public static int MAP = -1;
+    public static String MAP = null;
+    public static int MAPID = -1;
+    public static boolean SETUPMODE;
 
     public static final List<Player> INGAME = Lists.newArrayList();
     public static final List<Player> SPECTATING = Lists.newArrayList();
-    public static AbstractTask CURRENT_TASK = new WarmupTask();
+    public static AbstractTask CURRENT_TASK;
 
     @Getter
     private static IceWars instance;
@@ -71,15 +74,21 @@ public class IceWars extends JavaPlugin {
             saveDefaultConfig();
 
         getConfig().addDefault("server", "IW0");
+        getConfig().addDefault("setupMode", true);
         getConfig().options().copyDefaults(true);
         saveConfig();
         reloadConfig();
 
         SERVER = getConfig().getString("IW0");
+        SETUPMODE = getConfig().getBoolean("setupMode");
 
         registerEvents();
         registerCommands();
+        MapManager.loadDefaultWorld();
 
+        if (!SETUPMODE) {
+            CURRENT_TASK = new WarmupTask();
+        }
 
         System.out.println("[IceWars] Features loaded.");
     }
@@ -89,6 +98,9 @@ public class IceWars extends JavaPlugin {
 
         Document info = MongoConnection.info();
         type = TeamType.of(info.getString("teamType"));
+        MAP = info.getString("map");
+        MapManager.init();
+        MAPID = MapManager.getMapsByName().get(MAP);
 
         if (type == null) {
             getServer().getPluginManager().disablePlugin(this);
@@ -113,18 +125,18 @@ public class IceWars extends JavaPlugin {
         if (!backupDir.exists()) {
             System.out.println("[IceWars] No backup directory found! Creating...");
             backupDir.mkdirs();
-        }
-        System.out.println("[IceWars] Looking for world backups...");
-        for (File f : backupDir.listFiles())
-            if ((backupDir.isDirectory()) & (f.listFiles().length != 0))
-                backupsFound = true;
-
-        if (!backupsFound) {
-            System.out.println("[IceWars] No backups found or files are not directories?!");
         } else {
-            System.out.println("[IceWars] Starting world transfer...");
-            manager.importWorlds();
-            System.out.println("[IceWars] Transfer complete!");
+            System.out.println("[IceWars] Looking for world backups...");
+            for (File f : backupDir.listFiles())
+                if ((backupDir.isDirectory()) & (f.listFiles().length != 0))
+                    backupsFound = true;
+            if (!backupsFound) {
+                System.out.println("[IceWars] No backups found or files are not directories?!");
+            } else {
+                System.out.println("[IceWars] Starting world transfer...");
+                manager.importWorlds();
+                System.out.println("[IceWars] Transfer complete!");
+            }
         }
         System.out.println("[IceWars] Starting main system...");
 

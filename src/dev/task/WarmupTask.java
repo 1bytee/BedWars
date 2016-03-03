@@ -18,8 +18,8 @@ public class WarmupTask extends AbstractTask {
     public void run() {
         if (Bukkit.getOnlinePlayers().size() < 4 && cooldown == 60) {
             cooldown = 60;
-        } else if (Bukkit.getOnlinePlayers().size() < 4 && cooldown < 60) {
-            broadcast("Not enough players online. Restarting...");
+        } else if (Bukkit.getOnlinePlayers().size() < 4 && cooldown < 40) {
+            broadcast("Not enough players online. §c§lRestarting...");
             cancel();
             Bukkit.getScheduler().scheduleSyncDelayedTask(IceWars.getInstance(), Bukkit::shutdown, 20L);
         } else if (cooldown != 0) {

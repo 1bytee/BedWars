@@ -26,16 +26,6 @@ public final class MapManager {
     @Getter
     private static final HashMap<Integer, World> worldsById = Maps.newHashMap();
 
-    @Getter
-    @Setter(AccessLevel.PRIVATE)
-    private static String mapName = null;
-    @Getter
-    @Setter(AccessLevel.PRIVATE)
-    private static int mapId = -1;
-    @Getter
-    @Setter(AccessLevel.PRIVATE)
-    private static World mapWorld = null;
-
     private static boolean loaded = false;
 
     @SneakyThrows
@@ -48,7 +38,6 @@ public final class MapManager {
                     "Map1", "Map2", "Map3"
             });
         }
-
         cfg.options().copyDefaults(true);
         cfg.save(f);
 
@@ -66,15 +55,16 @@ public final class MapManager {
     public static void loadWorlds() {
         if (loaded) throw new IllegalStateException("Worlds already loaded!");
 
-        Bukkit.createWorld(new WorldCreator("Lobby"));
-
         for (int i : getMapsById().keySet()) {
             String w = getMapsById().get(i);
             World world = Bukkit.createWorld(new WorldCreator(w));
             worldsById.put(i, world);
         }
         loaded = true;
-        System.out.println("[SurvivalGames] " + getMapsById().size() + " worlds loaded.");
+        System.out.println("[IceWars] " + getMapsById().size() + " worlds loaded.");
     }
 
+    public static void loadDefaultWorld() {
+        Bukkit.createWorld(new WorldCreator("Lobby"));
+    }
 }

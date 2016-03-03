@@ -4,11 +4,9 @@ import com.google.common.collect.Maps;
 import com.mongodb.client.MongoCollection;
 import dev.IceWars;
 import org.bson.Document;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import ru.tehkode.permissions.PermissionUser;
-import ru.tehkode.permissions.bukkit.PermissionsEx;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,8 +41,10 @@ public class Ranks {
             prefix = "§e[Mod] §7";
         } else if (group.equalsIgnoreCase("vip")) {
             prefix = "§5[VIP] §7";
-        } else if (group.equalsIgnoreCase("premium")) {
+        } else if (group.startsWith("premium")) {
             prefix = "§6[Premium] §7";
+        } else if (group.equalsIgnoreCase("srmoderator")) {
+            prefix = "§e[SrMod] §7";
         }
         return prefix;
     }
@@ -56,11 +56,11 @@ public class Ranks {
             color = "§4";
         } else if (group.equalsIgnoreCase("developer")) {
             color = "§b";
-        } else if (group.equalsIgnoreCase("moderator")) {
+        } else if (group.equalsIgnoreCase("moderator") || group.equalsIgnoreCase("srmoderator")) {
             color = "§e";
         } else if (group.equalsIgnoreCase("vip")) {
             color = "§5";
-        } else if (group.equalsIgnoreCase("premium")) {
+        } else if (group.startsWith("premium")) {
             color = "§6";
         }
         return color;

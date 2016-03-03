@@ -3,7 +3,6 @@ package dev;
 import com.google.common.collect.Lists;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -208,7 +207,6 @@ public class WitchMenu implements Listener {
                 Enchantments.builder().e(Enchantment.ARROW_INFINITE).l(1).build()
         ));
         inv.addTrade(getItem(GOLD_INGOT, 13, "§6Gold"), getItem(BOW, "§bBow Lvl 3",
-                //NEIN
                 Enchantments.builder().e(Enchantment.ARROW_DAMAGE).l(1).build(),
                 Enchantments.builder().e(Enchantment.ARROW_KNOCKBACK).l(1).build(),
                 Enchantments.builder().e(Enchantment.ARROW_INFINITE).l(1).build()
