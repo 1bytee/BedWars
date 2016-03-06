@@ -21,10 +21,6 @@ public class TNTPig extends EntityPig implements ITNTPig {
     private Player p;
     private TNTPrimed tnt;
 
-    public TNTPig(World world) {
-        super(world);
-    }
-
     @SneakyThrows
     public TNTPig(Location loc, Player p) {
         super((World) loc.getWorld());

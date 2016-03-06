@@ -76,7 +76,6 @@ public class TNTPigRegister {
                 }
                 pig.getTNT().setFuseTicks(Math.round(8 * 20));
                 pig.getTNT().setIsIncendiary(false);
-                //TODO
                 item.updateTNT();
             }
         }.runTaskLater(IceWars.getInstance(), 5L);

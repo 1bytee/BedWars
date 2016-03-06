@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import dev.IceWars;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -24,12 +21,16 @@ public class Team {
     private final ChatColor color;
     private final String name;
     private final Block iceBlock;
+    private Location bronzeSpawn;
+    private Location silverSpawn;
 
     public Team(ChatColor color) {
         this.color = color;
-        iceBlock = iceblock(this);
         name = color.name().equals("AQUA") ? "Blue" : firstCharUppercase(color.name());
         players = Lists.newArrayList();
+        iceBlock = iceblock(this);
+        bronzeSpawn = bronzeSpawn(this);
+        silverSpawn = silverSpawn(this);
     }
 
     public void addPlayer(Player p) {
@@ -47,15 +48,37 @@ public class Team {
     }
 
     public boolean hasIceblock() {
-        return iceBlock.getType() == Material.ICE;
+        return iceBlock.getType() == Material.PACKED_ICE;
     }
 
     private static String firstCharUppercase(String string) {
-        return Character.toUpperCase(string.charAt(0)) + string.substring(1, string.length());
+        return Character.toUpperCase(string.charAt(0)) + string.substring(1, string.length()).toLowerCase();
+    }
+
+    private static Location silverSpawn(Team team) {
+        String path = IceWars.MAPID + ".silver." + team.name + ".";
+        File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
+        int x = cfg.getInt(path + "X");
+        int y = cfg.getInt(path + "Y");
+        int z = cfg.getInt(path + "Z");
+        World world = Bukkit.getWorld(cfg.getString(path + "W"));
+        return new Location(world, x, y, z);
+    }
+
+    private static Location bronzeSpawn(Team team) {
+        String path = IceWars.MAPID + ".bronze." + team.name + ".";
+        File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
+        int x = cfg.getInt(path + "X");
+        int y = cfg.getInt(path + "Y");
+        int z = cfg.getInt(path + "Z");
+        World world = Bukkit.getWorld(cfg.getString(path + "W"));
+        return new Location(world, x, y, z);
     }
 
     private static Block iceblock(Team team) {
-        String path = IceWars.MAP + "." + team.name + ".iceblock";
+        String path = IceWars.MAPID + "." + team.name + ".iceblock.";
         File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
         int x = cfg.getInt(path + "X");

@@ -16,9 +16,9 @@ public class WarmupTask extends AbstractTask {
 
     @Override
     public void run() {
-        if (Bukkit.getOnlinePlayers().size() < 4 && cooldown == 60) {
+        if (Bukkit.getOnlinePlayers().size() < 2 && cooldown == 60) {
             cooldown = 60;
-        } else if (Bukkit.getOnlinePlayers().size() < 4 && cooldown < 40) {
+        } else if (Bukkit.getOnlinePlayers().size() < 2 && cooldown < 40) {
             broadcast("Not enough players online. §c§lRestarting...");
             cancel();
             Bukkit.getScheduler().scheduleSyncDelayedTask(IceWars.getInstance(), Bukkit::shutdown, 20L);
@@ -44,10 +44,11 @@ public class WarmupTask extends AbstractTask {
 
             Bukkit.getOnlinePlayers().stream().filter(p -> IceWars.getTeam(p) == null).forEach(p -> IceWars.nextFreeTeam().addPlayer(p));
 
-            IceWars.getTeams().forEach(team -> team.getPlayers().forEach(p -> Locations.getSpawn(team)));
+            IceWars.getTeams().forEach(team -> team.getPlayers().forEach(p -> p.teleport(Locations.getSpawn(team))));
             cancel();
 
             IceWars.CURRENT_TASK = new IngameTask();
+            IceWars.ITEM_TASK = new ItemTask();
         }
     }
 
@@ -55,7 +56,7 @@ public class WarmupTask extends AbstractTask {
         if (color() == null)
             return;
 
-        Bukkit.getOnlinePlayers().forEach(p -> sendTitle(p, cooldown + color().toString()));
+        Bukkit.getOnlinePlayers().forEach(p -> sendTitle(p, color().toString() + cooldown));
     }
 
     private void sendTitle(Player p, String title) {
@@ -69,15 +70,15 @@ public class WarmupTask extends AbstractTask {
     private ChatColor color() {
         switch (cooldown) {
             case 5:
-                return ChatColor.RED;
+                return ChatColor.DARK_RED;
             case 4:
-                return ChatColor.GOLD;
+                return ChatColor.RED;
             case 3:
-                return ChatColor.YELLOW;
+                return ChatColor.GOLD;
             case 2:
-                return ChatColor.GREEN;
+                return ChatColor.YELLOW;
             case 1:
-                return ChatColor.DARK_GREEN;
+                return ChatColor.GREEN;
         }
         return null;
     }

@@ -4,21 +4,16 @@ import dev.IceWars;
 import dev.util.TeamType;
 import lombok.SneakyThrows;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.Set;
 
-public class SetIceBlock implements CommandExecutor {
+public class SetItemSpawn implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
@@ -38,25 +33,31 @@ public class SetIceBlock implements CommandExecutor {
             return true;
         }
 
-        int map = Integer.parseInt(args[1]);
-        String team = args[2];
+        if (args.length == 3) {
 
-        Block b = p.getTargetBlock((Set<Material>) null, 10);
+            int map = Integer.parseInt(args[1]);
+            String itemType = args[2];
 
-        System.out.println(b);
+            save(p.getLocation(), type, map, itemType);
+            p.sendMessage(IceWars.PREFIX + String.format("Item spawn has been set. (%1s, %d, %2s)", type.name(), map, itemType));
 
-        if (b.getType() == Material.PACKED_ICE) {
-            save(b.getLocation(), type, map, team);
-            p.sendMessage(IceWars.PREFIX + String.format("Spawn has been set. (%1s, %d, %2s)", type.name(), map, team));
         } else {
-            p.sendMessage(IceWars.PREFIX + "No Iceblock in sight.");
+
+            int map = Integer.parseInt(args[1]);
+            String team = args[2];
+            String itemType = args[3];
+
+            save(p.getLocation(), type, map, team, itemType);
+            p.sendMessage(IceWars.PREFIX + String.format("Item spawn has been set. (%1s, %d, %2s, %3s)", type.name(), map, team, itemType));
+
         }
-        return true;
+
+        return false;
     }
 
     @SneakyThrows
-    public void save(Location loc, TeamType type, int map, String team) {
-        String path = map + "." + team + ".iceblock.";
+    public void save(Location loc, TeamType type, int map, String itemType) {
+        String path = map + "." + itemType + ".";
         File f = new File(IceWars.getInstance().getDataFolder(), type.name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
         cfg.set(path + "X", loc.getX());
@@ -66,5 +67,16 @@ public class SetIceBlock implements CommandExecutor {
         cfg.save(f);
     }
 
+    @SneakyThrows
+    public void save(Location loc, TeamType type, int map, String team, String itemType) {
+        String path = map + "." + team + "." + itemType + ".";
+        File f = new File(IceWars.getInstance().getDataFolder(), type.name().toLowerCase() + ".yml");
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
+        cfg.set(path + "X", loc.getX());
+        cfg.set(path + "Y", loc.getY());
+        cfg.set(path + "Z", loc.getZ());
+        cfg.set(path + "W", loc.getWorld().getName());
+        cfg.save(f);
+    }
 
 }

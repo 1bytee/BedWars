@@ -25,6 +25,9 @@ public class Locations {
     @SneakyThrows(NullPointerException.class)
     public static Location getLocation(String name) {
         FileConfiguration cfg = getConfiguration("locations");
+        if (cfg.get(name.toLowerCase() + ".X") == null) {
+            return null;
+        }
         double x = cfg.getDouble(name.toLowerCase() + ".X");
         double y = cfg.getDouble(name.toLowerCase() + ".Y");
         double z = cfg.getDouble(name.toLowerCase() + ".Z");
@@ -46,7 +49,7 @@ public class Locations {
     }
 
     public static Location getSpawn(Team team) {
-        String path = IceWars.MAP + "." + team.getName() + ".";
+        String path = IceWars.MAPID + "." + team.getName() + ".";
         File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
         double x = cfg.getDouble(path + "X");
@@ -56,5 +59,16 @@ public class Locations {
         float pitch = NumberConversions.toFloat(cfg.get(path + "pitch"));
         World world = Bukkit.getWorld(cfg.getString(path + "W"));
         return new Location(world, x, y, z, yaw, pitch);
+    }
+
+    public static Location goldSpawn() {
+        String path = IceWars.MAPID + ".gold.";
+        File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
+        int x = cfg.getInt(path + "X");
+        int y = cfg.getInt(path + "Y");
+        int z = cfg.getInt(path + "Z");
+        World world = Bukkit.getWorld(cfg.getString(path + "W"));
+        return new Location(world, x, y, z);
     }
 }

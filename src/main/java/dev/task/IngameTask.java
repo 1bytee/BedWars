@@ -18,18 +18,20 @@ public class IngameTask extends AbstractTask {
                 sendBar("§7Time left: §e" + cooldown / 60 + " §7minutes");
             }
             if (cooldown == 120 || cooldown == 60) {
-                broadcast("Game ending in §e" + cooldown / 60 + " §7minute" + (cooldown / 60 == 1 ? "." : "s."));
+                sendBar("Game ending in §e" + cooldown / 60 + " §7minute" + (cooldown / 60 == 1 ? "." : "s."));
             }
             if (cooldown == 30 || cooldown == 20 || cooldown == 10) {
-                broadcast("Game ending in §e" + cooldown + " §7seconds.");
+                sendBar("Game ending in §e" + cooldown + " §7seconds.");
             }
             if (cooldown <= 5 && cooldown >= 1) {
-                broadcast("Game ending in §e" + cooldown + " §7second" + (cooldown == 1 ? "." : "s."));
+                sendBar("Game ending in §e" + cooldown + " §7second" + (cooldown == 1 ? "." : "s."));
             }
             cooldown--;
         } else {
             RestartTask.execute();
             cancel();
+            IceWars.ITEM_TASK.cancel();
+            IceWars.ITEM_TASK = null;
             IceWars.CURRENT_TASK = null;
         }
     }

@@ -14,7 +14,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -110,25 +112,59 @@ public class WitchMenu implements Listener {
                 p.updateInventory();
 
                 if (e.getCurrentItem().getType() == SANDSTONE) {
+                    players.remove(p);
                     openBlocks(p);
                 } else if (e.getCurrentItem().getType() == IRON_CHESTPLATE) {
+                    players.remove(p);
                     openArmor(p);
                 } else if (e.getCurrentItem().getType() == WOOD_PICKAXE) {
+                    players.remove(p);
                     openPickaxe(p);
                 } else if (e.getCurrentItem().getType() == IRON_SWORD) {
+                    players.remove(p);
                     openSwords(p);
                 } else if (e.getCurrentItem().getType() == BOW) {
+                    players.remove(p);
                     openBows(p);
                 } else if (e.getCurrentItem().getType() == APPLE) {
+                    players.remove(p);
                     openFood(p);
                 } else if (e.getCurrentItem().getType() == CHEST) {
+                    players.remove(p);
                     openChests(p);
                 } else if (e.getCurrentItem().getType() == POTION) {
+                    players.remove(p);
                     openPotions(p);
                 } else if (e.getCurrentItem().getType() == TNT) {
+                    players.remove(p);
                     openSpecial(p);
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onKick(PlayerQuitEvent e) {
+        closeInventory(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        closeInventory(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onClose(InventoryCloseEvent e) {
+        Player p = (Player) e.getPlayer();
+        if (players.contains(p)) {
+            players.remove(p);
+        }
+    }
+
+    private void closeInventory(Player p) {
+        if (players.contains(p)) {
+            players.remove(p);
+            p.closeInventory();
         }
     }
 
@@ -246,7 +282,7 @@ public class WitchMenu implements Listener {
         inv.addTrade(getItem(IRON_INGOT, 7, "§7Silver"), getItem(FLINT_AND_STEEL, "§cFlint And Steel"));
         inv.addTrade(getItem(GOLD_INGOT, 3, "§6Gold"), getItem(TNT, "§cTNT"));
         inv.addTrade(getItem(GOLD_INGOT, 13, "§6Gold"), getItem(ENDER_PEARL, "§cEnder Pearl"));
-        inv.addTrade(getItem(CLAY_BRICK, 64, "§cBronze"), getItem(MONSTER_EGG, "§cTNT Pig", 90));
+        inv.addTrade(getItem(CLAY_BRICK, 64, "§cBronze"), getItem(MONSTER_EGG, "§cJihadi", 90));
         inv.openTrade(p);
     }
 

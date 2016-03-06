@@ -14,6 +14,10 @@ public abstract class AbstractTask implements Runnable {
         PID = Bukkit.getScheduler().scheduleSyncRepeatingTask(IceWars.getInstance(), this, 0, 20L);
     }
 
+    protected AbstractTask(long ticks) {
+        PID = Bukkit.getScheduler().scheduleSyncRepeatingTask(IceWars.getInstance(), this, 0, ticks);
+    }
+
     public void cancel() {
         Bukkit.getScheduler().cancelTask(PID);
     }

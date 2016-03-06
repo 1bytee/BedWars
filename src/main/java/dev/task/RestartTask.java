@@ -16,6 +16,9 @@ public class RestartTask {
         if (IceWars.CURRENT_TASK != null) {
             IceWars.CURRENT_TASK.cancel();
         }
+        if (IceWars.ITEM_TASK != null) {
+            IceWars.ITEM_TASK.cancel();
+        }
         broadcast("The game has ended.");
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.setFlying(false);
@@ -34,7 +37,7 @@ public class RestartTask {
             sendTitle(team.getColor() + team.getName(), "§7wins!");
         }
         Bukkit.broadcastMessage("§cServer restarting in 10 seconds.");
-        Bukkit.getScheduler().scheduleSyncDelayedTask(IceWars.getInstance(), Bukkit::shutdown, 10*20L);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(IceWars.getInstance(), Bukkit::shutdown, 10 * 20L);
     }
 
     private static void broadcast(String message) {

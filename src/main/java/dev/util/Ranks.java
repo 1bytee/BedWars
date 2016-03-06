@@ -45,6 +45,8 @@ public class Ranks {
             prefix = "§6[Premium] §7";
         } else if (group.equalsIgnoreCase("srmoderator")) {
             prefix = "§e[SrMod] §7";
+        } else if (group.equalsIgnoreCase("builder")) {
+            prefix = "§a[Builder]";
         }
         return prefix;
     }
@@ -62,6 +64,8 @@ public class Ranks {
             color = "§5";
         } else if (group.startsWith("premium")) {
             color = "§6";
+        } else if (group.equalsIgnoreCase("builder")) {
+            color = "§a";
         }
         return color;
     }

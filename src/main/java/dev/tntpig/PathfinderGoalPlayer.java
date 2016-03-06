@@ -13,11 +13,6 @@ public class PathfinderGoalPlayer extends PathfinderGoalMeleeAttack {
         creature = entityCreature;
     }
 
-    public PathfinderGoalPlayer(EntityCreature entityCreature, double v, boolean b) {
-        super(entityCreature, v, b);
-        creature = entityCreature;
-    }
-
     @Override
     public void e() {
         creature.getNavigation().a(creature.getGoalTarget());

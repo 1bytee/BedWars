@@ -22,6 +22,15 @@ public class WorldCommand implements CommandExecutor {
             return true;
         }
 
+        if (args.length != 1) {
+            String worlds = "";
+            for (World world1 : Bukkit.getWorlds()) {
+                worlds += world1.getName() + ", ";
+            }
+            p.sendMessage(IceWars.PREFIX + "Available worlds: §e" + worlds.substring(0, worlds.length() - 2));
+            return true;
+        }
+
         World world = Bukkit.getWorld(args[0]);
 
         if (world == null) {

@@ -18,6 +18,8 @@ public class Scoreboards {
         srmoderator.setPrefix("§7[SRMOD] §e");
         Team moderator = board.registerNewTeam("4moderator");
         moderator.setPrefix("§7[MOD] §e");
+        Team builder = board.registerNewTeam("5builder");
+        builder.setPrefix("§7[BUILDER] §a");
         Team vip = board.registerNewTeam("5vip");
         vip.setPrefix("§7[VIP] §5");
         Team premium = board.registerNewTeam("6premium");
@@ -39,6 +41,8 @@ public class Scoreboards {
                 vip.addEntry(player.getName());
             else if (color.equals("§6"))
                 premium.addEntry(player.getName());
+            else if (color.equals("§a"))
+                builder.addEntry(player.getName());
             else
                 user.addEntry(player.getName());
         }

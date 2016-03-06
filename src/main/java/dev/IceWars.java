@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dev.events.WorldListener;
 import dev.tntpig.TNTPigExecutor;
 import dev.tntpig.TNTPigRegister;
 import dev.commands.*;
@@ -14,17 +15,11 @@ import dev.map.MapManager;
 import dev.map.MapReset;
 import dev.task.AbstractTask;
 import dev.task.WarmupTask;
-import dev.util.GameState;
-import dev.util.MongoConnection;
-import dev.util.Team;
-import dev.util.TeamType;
+import dev.util.*;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.bson.Document;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,6 +48,8 @@ public class IceWars extends JavaPlugin {
     public static final List<Player> INGAME = Lists.newArrayList();
     public static final List<Player> SPECTATING = Lists.newArrayList();
     public static AbstractTask CURRENT_TASK;
+    public static Location goldSpawn;
+    public static AbstractTask ITEM_TASK;
 
     public static TNTPigRegister REGISTER = new TNTPigRegister();
 
@@ -83,7 +80,7 @@ public class IceWars extends JavaPlugin {
         saveConfig();
         reloadConfig();
 
-        SERVER = getConfig().getString("IW0");
+        SERVER = getConfig().getString("server");
         SETUPMODE = getConfig().getBoolean("setupMode");
 
         registerEvents();
@@ -92,6 +89,13 @@ public class IceWars extends JavaPlugin {
 
         if (!SETUPMODE) {
             CURRENT_TASK = new WarmupTask();
+        } else {
+            MapManager.loadAllWorlds();
+            type = TeamType.T2x2;
+
+            for (int i = 0; i < type.getTeamSize(); i++) {
+                teams.add(new Team(colors[i]));
+            }
         }
 
         System.out.println("[IceWars] Features loaded.");
@@ -101,6 +105,8 @@ public class IceWars extends JavaPlugin {
         teams.clear();
 
         Document info = MongoConnection.info();
+        System.out.println(info);
+        System.out.println(info.getString("teamType"));
         type = TeamType.of(info.getString("teamType"));
         MAP = info.getString("map");
         MapManager.init();
@@ -108,13 +114,16 @@ public class IceWars extends JavaPlugin {
 
         if (type == null) {
             getServer().getPluginManager().disablePlugin(this);
-            System.out.println("[IceWars] Invalid TeamType: " + getConfig().getString("type"));
+            System.out.println("[IceWars] Invalid TeamType: " + info.getString("teamType"));
             return;
         }
 
-        for (int i = 0; i < type.getTeamSize(); i++) {
+        for (int i = 0; i < type.getAmount(); i++) {
             teams.add(new Team(colors[i]));
         }
+
+        goldSpawn = Locations.goldSpawn();
+
     }
 
     @Override
@@ -155,6 +164,7 @@ public class IceWars extends JavaPlugin {
         pm.registerEvents(new SpectatorListener.SpectatorCompass(), this);
         pm.registerEvents(new TeamSelector(), this);
         pm.registerEvents(new TNTPigExecutor(), this);
+        pm.registerEvents(new WorldListener(), this);
     }
 
     private void registerCommands() {
@@ -163,6 +173,7 @@ public class IceWars extends JavaPlugin {
         getCommand("seticeblock").setExecutor(new SetIceBlock());
         getCommand("setlobbyspawn").setExecutor(new SetLobbySpawn());
         getCommand("world").setExecutor(new WorldCommand());
+        getCommand("setitemspawn").setExecutor(new SetItemSpawn());
     }
 
     public static Team getTeam(Player p) {

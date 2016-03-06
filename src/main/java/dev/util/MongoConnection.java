@@ -15,6 +15,7 @@ public class MongoConnection {
         client = new MongoClient("localhost");
     }
 
+
     public static MongoDatabase getDatabase(String name) {
         return client.getDatabase(name);
     }

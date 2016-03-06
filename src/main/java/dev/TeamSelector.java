@@ -27,7 +27,9 @@ public class TeamSelector implements Listener {
         Player p = e.getPlayer();
         if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (p.getItemInHand().getType() == Material.ENCHANTED_BOOK) {
-                openInventory(p);
+                if (!IceWars.getTeams().isEmpty()) {
+                    openInventory(p);
+                }
             }
         }
     }

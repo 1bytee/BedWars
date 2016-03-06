@@ -50,14 +50,41 @@ public final class MapManager {
         loadWorlds();
     }
 
+    @SneakyThrows
+    public static void loadAllWorlds() {
+        System.out.println("Hallo");
+        File f = new File(IceWars.getInstance().getDataFolder(), "worldnames.yml");
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
+
+        for (TeamType type : TeamType.values()) {
+            cfg.addDefault(type.name(), new String[]{
+                    "Map1", "Map2", "Map3"
+            });
+        }
+        cfg.options().copyDefaults(true);
+        cfg.save(f);
+
+        cfg = YamlConfiguration.loadConfiguration(f);
+        for (TeamType type : TeamType.values()) {
+            List<String> worlds = cfg.getStringList(type.name());
+            int i = 1;
+            for (String ignored : worlds) {
+                String w = type.name() + "_Map" + i;
+                Bukkit.createWorld(new WorldCreator(w));
+                i++;
+            }
+        }
+    }
+
     public static void loadWorlds() {
         if (loaded) throw new IllegalStateException("Worlds already loaded!");
 
         for (int i : getMapsById().keySet()) {
-            String w = getMapsById().get(i);
+            String w = IceWars.getType().name() + "_Map" + i;
             World world = Bukkit.createWorld(new WorldCreator(w));
             worldsById.put(i, world);
         }
+
         loaded = true;
         System.out.println("[IceWars] " + getMapsById().size() + " worlds loaded.");
     }

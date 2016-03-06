@@ -1,6 +1,7 @@
 package dev.events;
 
 import dev.IceWars;
+import dev.task.RestartTask;
 import dev.util.*;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
@@ -9,14 +10,13 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Witch;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -108,7 +108,6 @@ public class PlayerListener implements Listener {
     }
 
 
-
     @EventHandler
     public void onFarCry(PlayerRespawnEvent e) {
         Player p = e.getPlayer();
@@ -122,29 +121,78 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onCedricWech(EntityDamageByEntityEvent e) {
-        Player p = (Player) e.getEntity();
-
-        if (e.getDamager() instanceof Player) {
-            Player damager = (Player) e.getDamager();
-            if (IceWars.getTeam(damager) == IceWars.getTeam(p)) {
-                e.setCancelled(true);
-                e.setDamage(0D);
-                return;
-            }
+    public void onEntityDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Witch || IceWars.STATE != GameState.INGAME) {
+            e.setCancelled(true);
         }
 
-        if (e.getDamage() > p.getHealth()) {
-            e.setCancelled(true);
-            e.setDamage(0D);
+        if (e.getEntity() instanceof Player) {
+            Player p = (Player) e.getEntity();
+            if (e.getDamage() > p.getHealth()) {
 
-            p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 2, 255));
+                p.setHealth(20D);
+                p.setFoodLevel(20);
+                p.getInventory().clear();
+                p.getInventory().setArmorContents(new ItemStack[4]);
+
+                e.setCancelled(true);
+                e.setDamage(0D);
+
+                if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
+
+                } else {
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7died.");
+                }
+
+                p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 255));
+                sendTitle(p, "§cYOU DIED");
+                Team team = IceWars.getTeam(p);
+
+                if (team == null) {
+                    p.kickPlayer("§cAn error occurred.");
+                    System.err.println("[IceWars] Player " + p.getName() + " wasn't in a team? [EntityDamageByEntityEvent]");
+                    return;
+                }
+
+                if (team.hasIceblock()) {
+                    p.teleport(Locations.getSpawn(team));
+                } else {
+                    p.teleport(Locations.getLocation("spawn"));
+                    team.removePlayer(p);
+                    if (team.getPlayers().size() > 0) {
+                        Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has only §e" + team.getPlayers().size() + (team.getPlayers().size() == 0 ? " §7player " : " §7players ") + "left.");
+                    } else {
+                        Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has been §c§lELIMINATED§7.");
+                        IceWars.getTeams().remove(team);
+                    }
+                    if (IceWars.getTeams().size() <= 1) {
+                        RestartTask.execute();
+                    }
+                    p.sendMessage(IceWars.PREFIX + "You have been eliminated.");
+                    IceWars.setToSpectator(p);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        Player p = e.getPlayer();
+        if (p.getLocation().getY() < -23) {
+            p.setFallDistance(-100F);
+
+            p.setHealth(20D);
+            p.setFoodLevel(20);
+            p.getInventory().clear();
+            p.getInventory().setArmorContents(new ItemStack[4]);
+
+            p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 255));
             sendTitle(p, "§cYOU DIED");
             Team team = IceWars.getTeam(p);
 
             if (team == null) {
                 p.kickPlayer("§cAn error occurred.");
-                System.err.println("[IceWars] Player " + p.getName() + " wasn't in a team? [PlayerDeathEvent]");
+                System.err.println("[IceWars] Player " + p.getName() + " wasn't in a team? [PlayerMoveEvent]");
                 return;
             }
 
@@ -158,6 +206,69 @@ public class PlayerListener implements Listener {
                 } else {
                     Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has been §c§lELIMINATED§7.");
                     IceWars.getTeams().remove(team);
+                }
+                if (IceWars.getTeams().size() <= 1) {
+                    RestartTask.execute();
+                }
+                p.sendMessage(IceWars.PREFIX + "You have been eliminated.");
+                IceWars.setToSpectator(p);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onDrop(PlayerDropItemEvent e) {
+        if (!IceWars.INGAME.contains(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onCedricWech(EntityDamageByEntityEvent e) {
+
+        Player p = (Player) e.getEntity();
+
+        if (e.getDamager() instanceof Player) {
+            Player damager = (Player) e.getDamager();
+            if (IceWars.getTeam(damager) == IceWars.getTeam(p)) {
+                e.setCancelled(true);
+                e.setDamage(0D);
+                return;
+            }
+        }
+        if (e.getDamage() > p.getHealth()) {
+
+            p.setHealth(20D);
+            p.setFoodLevel(20);
+            p.getInventory().clear();
+            p.getInventory().setArmorContents(new ItemStack[4]);
+
+            e.setCancelled(true);
+            e.setDamage(0D);
+
+            p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 255));
+            sendTitle(p, "§cYOU DIED");
+            Team team = IceWars.getTeam(p);
+
+            if (team == null) {
+                p.kickPlayer("§cAn error occurred.");
+                System.err.println("[IceWars] Player " + p.getName() + " wasn't in a team? [EntityDamageByEntityEvent]");
+                return;
+            }
+
+            if (team.hasIceblock()) {
+                p.teleport(Locations.getSpawn(team));
+            } else {
+                p.teleport(Locations.getLocation("spawn"));
+                team.removePlayer(p);
+                if (team.getPlayers().size() > 0) {
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has only §e" + team.getPlayers().size() + (team.getPlayers().size() == 0 ? " §7player " : " §7players ") + "left.");
+                } else {
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has been §c§lELIMINATED§7.");
+                    IceWars.getTeams().remove(team);
+                }
+                if (IceWars.getTeams().size() <= 1) {
+                    RestartTask.execute();
                 }
                 p.sendMessage(IceWars.PREFIX + "You have been eliminated.");
                 IceWars.setToSpectator(p);
