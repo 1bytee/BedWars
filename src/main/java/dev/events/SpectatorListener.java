@@ -29,6 +29,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class SpectatorListener implements Listener {
 
@@ -127,7 +128,7 @@ public class SpectatorListener implements Listener {
 
     public static class SpectatorCompass implements Listener {
 
-        private ArrayList<Player> players = new ArrayList<>();
+        private List<Player> players = new ArrayList<>();
 
         @EventHandler
         public void onInteract(PlayerInteractEvent e) {

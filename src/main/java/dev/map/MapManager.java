@@ -52,7 +52,6 @@ public final class MapManager {
 
     @SneakyThrows
     public static void loadAllWorlds() {
-        System.out.println("Hallo");
         File f = new File(IceWars.getInstance().getDataFolder(), "worldnames.yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
 

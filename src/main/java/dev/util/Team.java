@@ -28,15 +28,23 @@ public class Team {
         this.color = color;
         name = color.name().equals("AQUA") ? "Blue" : firstCharUppercase(color.name());
         players = Lists.newArrayList();
-        iceBlock = iceblock(this);
+        if (color == ChatColor.BLACK) {
+            iceBlock = null;
+            bronzeSpawn = null;
+            silverSpawn = null;
+            return;
+        }
+        iceBlock = iceBlock(this);
         bronzeSpawn = bronzeSpawn(this);
         silverSpawn = silverSpawn(this);
     }
 
-    public void addPlayer(Player p) {
+    public boolean addPlayer(Player p) {
         if (players.size() < IceWars.getType().getTeamSize()) {
             players.add(p);
+            return true;
         }
+        return false;
     }
 
     public void removePlayer(Player p) {
@@ -77,7 +85,7 @@ public class Team {
         return new Location(world, x, y, z);
     }
 
-    private static Block iceblock(Team team) {
+    private static Block iceBlock(Team team) {
         String path = IceWars.MAPID + "." + team.name + ".iceblock.";
         File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);

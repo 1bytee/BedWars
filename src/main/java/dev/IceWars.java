@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dev.events.WorldListener;
+import dev.stats.PlayerStats;
 import dev.tntpig.TNTPigExecutor;
 import dev.tntpig.TNTPigRegister;
 import dev.commands.*;
@@ -18,8 +19,11 @@ import dev.task.WarmupTask;
 import dev.util.*;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.bukkit.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -35,6 +39,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class IceWars extends JavaPlugin {
 
@@ -45,13 +51,12 @@ public class IceWars extends JavaPlugin {
     public static int MAPID = -1;
     public static boolean SETUPMODE;
 
-    public static final List<Player> INGAME = Lists.newArrayList();
-    public static final List<Player> SPECTATING = Lists.newArrayList();
-    public static AbstractTask CURRENT_TASK;
+    public static final List<Player> INGAME = Lists.newArrayList(), SPECTATING = Lists.newArrayList();
+    public static AbstractTask CURRENT_TASK, ITEM_TASK;
     public static Location goldSpawn;
-    public static AbstractTask ITEM_TASK;
 
-    public static TNTPigRegister REGISTER = new TNTPigRegister();
+    public static final Map<String, PlayerStats> STATS = Maps.newLinkedHashMap();
+    public static final TNTPigRegister REGISTER = new TNTPigRegister();
 
     @Getter
     private static IceWars instance;
@@ -105,8 +110,6 @@ public class IceWars extends JavaPlugin {
         teams.clear();
 
         Document info = MongoConnection.info();
-        System.out.println(info);
-        System.out.println(info.getString("teamType"));
         type = TeamType.of(info.getString("teamType"));
         MAP = info.getString("map");
         MapManager.init();
@@ -124,6 +127,8 @@ public class IceWars extends JavaPlugin {
 
         goldSpawn = Locations.goldSpawn();
 
+        //TODO fix this...
+        Bukkit.getWorlds().forEach(world -> world.getEntities().stream().filter(e -> e.getType() != EntityType.WITCH && e.getType() != EntityType.PLAYER).forEach(Entity::remove));
     }
 
     @Override
@@ -174,6 +179,7 @@ public class IceWars extends JavaPlugin {
         getCommand("setlobbyspawn").setExecutor(new SetLobbySpawn());
         getCommand("world").setExecutor(new WorldCommand());
         getCommand("setitemspawn").setExecutor(new SetItemSpawn());
+        getCommand("stats").setExecutor(new StatsCommand());
     }
 
     public static Team getTeam(Player p) {
@@ -215,11 +221,7 @@ public class IceWars extends JavaPlugin {
     }
 
     public static void setToSpectator(Player p) {
-        Bukkit.getOnlinePlayers().forEach(o -> {
-            if (p != o) {
-                o.hidePlayer(p);
-            }
-        });
+        Bukkit.getOnlinePlayers().stream().filter(o -> o != p).forEach(o -> o.hidePlayer(p));
 
         if (INGAME.contains(p)) {
             INGAME.remove(p);
@@ -244,23 +246,23 @@ public class IceWars extends JavaPlugin {
         p.sendMessage(PREFIX + "Use the compass to spectate other players!");
     }
 
-    private static final Map<Player, UUID> uuidMap = Maps.newHashMap();
+    private static final Map<String, UUID> uuidMap = Maps.newHashMap();
     private static final Gson gson = new Gson();
 
     @SneakyThrows
-    public static UUID getUUID(Player p) {
-        if (uuidMap.containsKey(p)) {
-            return uuidMap.get(p);
+    public static UUID getUUID(String name) {
+        if (uuidMap.containsKey(name)) {
+            return uuidMap.get(name);
         } else {
-            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.mojang.com/users/profiles/minecraft/" + p.getName()).openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String s;
-            StringBuilder builder = new StringBuilder();
-            while ((s = reader.readLine()) != null) {
-                builder.append(s);
-            }
-            return UUID.fromString(gson.fromJson(builder.toString(), JsonObject.class).get("id").getAsString().replaceAll("(?i)(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w+)", "$1-$2-$3-$4-$5"));
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.mojang.com/users/profiles/minecraft/" + name).openConnection();
+            JsonObject object = gson.fromJson(IOUtils.toString(connection.getInputStream()), JsonObject.class);
+            uuidMap.put(object.get("name").getAsString(), UUID.fromString(object.get("id").getAsString().replaceAll("(?i)(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w+)", "$1-$2-$3-$4-$5")));
+            return uuidMap.get(object.get("name").getAsString());
         }
+    }
+
+    public static UUID getUUID(Player p) {
+        return getUUID(p.getName());
     }
 
 }

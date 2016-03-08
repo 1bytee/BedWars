@@ -17,7 +17,7 @@ import java.util.List;
 
 public class BlockListener implements Listener {
 
-    private final List<Material> materials = Arrays.asList(Material.SANDSTONE, Material.IRON_BLOCK, Material.ENDER_STONE, Material.GLOWSTONE);
+    private final List<Material> materials = Arrays.asList(Material.CHEST, Material.SANDSTONE, Material.IRON_BLOCK, Material.ENDER_STONE, Material.GLOWSTONE);
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
@@ -37,13 +37,13 @@ public class BlockListener implements Listener {
                     }
                 }
 
-                if (nearestTeam == IceWars.getTeam(p)) {
-                    e.setCancelled(true);
+                if (nearestTeam.equals(IceWars.getTeam(p))) {
                     p.sendMessage(IceWars.PREFIX + "You can't destroy the ice block of your team.");
+                    e.setCancelled(true);
                     return;
                 }
 
-                Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + nearestTeam.getName() + "§7's ice block has been destroyed.");
+                Bukkit.broadcastMessage(IceWars.PREFIX + "Team " + nearestTeam.getColor() + nearestTeam.getName() + "§7's ice block has been destroyed.");
             } else {
                 if (!materials.contains(mat)) {
                     e.setCancelled(true);
@@ -62,7 +62,7 @@ public class BlockListener implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
         Player p = e.getPlayer();
-        if (!IceWars.INGAME.contains(p)) {
+        if (IceWars.INGAME.contains(p)) {
             if (e.getBlock().getType() == Material.TNT) {
                 e.setCancelled(true);
                 e.getBlock().getWorld().spawnEntity(e.getBlock().getLocation(), EntityType.PRIMED_TNT);

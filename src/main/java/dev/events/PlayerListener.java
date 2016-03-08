@@ -1,6 +1,7 @@
 package dev.events;
 
 import dev.IceWars;
+import dev.stats.PlayerStats;
 import dev.task.RestartTask;
 import dev.util.*;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
@@ -16,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -31,6 +33,10 @@ public class PlayerListener implements Listener {
         Player p = e.getPlayer();
 
         Scoreboards.doScoreboard();
+
+        PlayerStats stats = new PlayerStats(p);
+        stats.loadStats();
+        IceWars.STATS.put(p.getName(), stats);
 
         if (p.isDead())
             p.spigot().respawn();
@@ -71,6 +77,9 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
+
+        IceWars.STATS.get(p.getName()).saveStats();
+
         if (IceWars.STATE == GameState.WARMUP) {
             e.setQuitMessage(IceWars.PREFIX + "§e" + p.getName() + " §7left the game.");
         } else {
@@ -97,7 +106,7 @@ public class PlayerListener implements Listener {
             if (IceWars.INGAME.contains(p)) {
                 Team team = IceWars.getTeam(p);
                 if (e.getMessage().startsWith("@all")) {
-                    Bukkit.broadcastMessage(team.getColor() + p.getName() + ": §f" + e.getMessage().substring(5, e.getMessage().length()));
+                    Bukkit.broadcastMessage("§7[ALL] " + team.getColor() + p.getName() + ": §f" + e.getMessage().substring(5, e.getMessage().length()));
                 } else {
                     team.sendMessage(team.getColor() + p.getName() + ": §f" + e.getMessage());
                 }
@@ -128,6 +137,7 @@ public class PlayerListener implements Listener {
 
         if (e.getEntity() instanceof Player) {
             Player p = (Player) e.getEntity();
+            Player killer = null;
             if (e.getDamage() > p.getHealth()) {
 
                 p.setHealth(20D);
@@ -139,7 +149,13 @@ public class PlayerListener implements Listener {
                 e.setDamage(0D);
 
                 if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-
+                    EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) p.getLastDamageCause();
+                    if (event.getDamager() instanceof Player) {
+                        Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7was killed by §e" + event.getDamager().getName() + "§7.");
+                        killer = (Player) event.getDamager();
+                    } else {
+                        Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7died.");
+                    }
                 } else {
                     Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7died.");
                 }
@@ -157,12 +173,20 @@ public class PlayerListener implements Listener {
                 if (team.hasIceblock()) {
                     p.teleport(Locations.getSpawn(team));
                 } else {
+                    PlayerStats stats = IceWars.STATS.get(p.getName());
+                    stats.addDeath();
+                    IceWars.STATS.put(p.getName(), stats);
+                    if (killer != null) {
+                        PlayerStats killerStats = IceWars.STATS.get(killer.getName());
+                        killerStats.addKill();
+                        IceWars.STATS.put(killer.getName(), stats);
+                    }
                     p.teleport(Locations.getLocation("spawn"));
                     team.removePlayer(p);
                     if (team.getPlayers().size() > 0) {
-                        Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has only §e" + team.getPlayers().size() + (team.getPlayers().size() == 0 ? " §7player " : " §7players ") + "left.");
+                        Bukkit.broadcastMessage(IceWars.PREFIX + "Team " + team.getColor() + team.getName() + " §7has only §e" + team.getPlayers().size() + (team.getPlayers().size() == 0 ? " §7player " : " §7players ") + "left.");
                     } else {
-                        Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has been §c§lELIMINATED§7.");
+                        Bukkit.broadcastMessage(IceWars.PREFIX + "Team " + team.getColor() + team.getName() + " §7has been §c§lELIMINATED§7.");
                         IceWars.getTeams().remove(team);
                     }
                     if (IceWars.getTeams().size() <= 1) {
@@ -178,6 +202,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
+        Player killer = null;
         if (p.getLocation().getY() < -23) {
             p.setFallDistance(-100F);
 
@@ -190,6 +215,18 @@ public class PlayerListener implements Listener {
             sendTitle(p, "§cYOU DIED");
             Team team = IceWars.getTeam(p);
 
+            if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
+                EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) p.getLastDamageCause();
+                if (event.getDamager() instanceof Player) {
+                    killer = (Player) event.getDamager();
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7was killed by §e" + event.getDamager().getName() + "§7.");
+                } else {
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7died.");
+                }
+            } else {
+                Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7died.");
+            }
+
             if (team == null) {
                 p.kickPlayer("§cAn error occurred.");
                 System.err.println("[IceWars] Player " + p.getName() + " wasn't in a team? [PlayerMoveEvent]");
@@ -199,12 +236,20 @@ public class PlayerListener implements Listener {
             if (team.hasIceblock()) {
                 p.teleport(Locations.getSpawn(team));
             } else {
+                PlayerStats stats = IceWars.STATS.get(p.getName());
+                stats.addDeath();
+                IceWars.STATS.put(p.getName(), stats);
+                if (killer != null) {
+                    PlayerStats killerStats = IceWars.STATS.get(killer.getName());
+                    killerStats.addKill();
+                    IceWars.STATS.put(killer.getName(), stats);
+                }
                 p.teleport(Locations.getLocation("spawn"));
                 team.removePlayer(p);
                 if (team.getPlayers().size() > 0) {
-                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has only §e" + team.getPlayers().size() + (team.getPlayers().size() == 0 ? " §7player " : " §7players ") + "left.");
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team " + team.getColor() + team.getName() + " §7has only §e" + team.getPlayers().size() + (team.getPlayers().size() == 0 ? " §7player " : " §7players ") + "left.");
                 } else {
-                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has been §c§lELIMINATED§7.");
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team " + team.getColor() + team.getName() + " §7has been §c§lELIMINATED§7.");
                     IceWars.getTeams().remove(team);
                 }
                 if (IceWars.getTeams().size() <= 1) {
@@ -224,18 +269,33 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onCraft(CraftItemEvent e) {
+        e.setCancelled(true);
+        e.getWhoClicked().closeInventory();
+    }
+
+    @EventHandler
     public void onCedricWech(EntityDamageByEntityEvent e) {
+        if (!(e.getEntity() instanceof Player)) {
+            e.setCancelled(true);
+            e.setDamage(0D);
+            return;
+        }
 
         Player p = (Player) e.getEntity();
+        Player killer = null;
 
         if (e.getDamager() instanceof Player) {
             Player damager = (Player) e.getDamager();
-            if (IceWars.getTeam(damager) == IceWars.getTeam(p)) {
+            if (IceWars.getTeam(damager).equals(IceWars.getTeam(p))) {
                 e.setCancelled(true);
                 e.setDamage(0D);
                 return;
+            } else if (damager.getItemInHand() == null || damager.getItemInHand().getType() == Material.AIR) {
+                e.setDamage(0.5D);
             }
         }
+
         if (e.getDamage() > p.getHealth()) {
 
             p.setHealth(20D);
@@ -256,15 +316,30 @@ public class PlayerListener implements Listener {
                 return;
             }
 
+            if (e.getDamager() instanceof Player) {
+                Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7was killed by §e" + e.getDamager().getName() + "§7.");
+                killer = (Player) e.getDamager();
+            } else {
+                Bukkit.broadcastMessage(IceWars.PREFIX + "Player §e" + p.getName() + " §7died.");
+            }
+
             if (team.hasIceblock()) {
                 p.teleport(Locations.getSpawn(team));
             } else {
+                PlayerStats stats = IceWars.STATS.get(p.getName());
+                stats.addDeath();
+                IceWars.STATS.put(p.getName(), stats);
+                if (killer != null) {
+                    PlayerStats killerStats = IceWars.STATS.get(killer.getName());
+                    killerStats.addKill();
+                    IceWars.STATS.put(killer.getName(), stats);
+                }
                 p.teleport(Locations.getLocation("spawn"));
                 team.removePlayer(p);
                 if (team.getPlayers().size() > 0) {
-                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has only §e" + team.getPlayers().size() + (team.getPlayers().size() == 0 ? " §7player " : " §7players ") + "left.");
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team " + team.getColor() + team.getName() + " §7has only §e" + team.getPlayers().size() + (team.getPlayers().size() == 0 ? " §7player " : " §7players ") + "left.");
                 } else {
-                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team §e" + team.getName() + " §7has been §c§lELIMINATED§7.");
+                    Bukkit.broadcastMessage(IceWars.PREFIX + "Team " + team.getColor() + team.getName() + " §7has been §c§lELIMINATED§7.");
                     IceWars.getTeams().remove(team);
                 }
                 if (IceWars.getTeams().size() <= 1) {
@@ -278,9 +353,12 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent e) {
+        Player p = (Player) e.getEntity();
         if (IceWars.STATE != GameState.INGAME) {
             e.setCancelled(true);
             e.setFoodLevel(20);
+        } else {
+            p.setSaturation(4f);
         }
     }
 

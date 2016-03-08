@@ -34,11 +34,6 @@ public class SpawnWitch implements CommandExecutor {
         EntityWitch nmsWitch = ((CraftWitch) witch).getHandle();
 
         try {
-
-            System.out.println(nmsWitch.getClass().getSuperclass().getSimpleName());
-            System.out.println(nmsWitch.getClass().getSuperclass().getSuperclass().getSimpleName());
-            System.out.println(nmsWitch.getClass().getSuperclass().getSuperclass().getSuperclass().getSimpleName());
-
             Field goal = nmsWitch.getClass().getSuperclass().getSuperclass().getSuperclass().getDeclaredField("goalSelector");
             goal.setAccessible(true);
 

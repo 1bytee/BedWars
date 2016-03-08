@@ -46,7 +46,7 @@ public class Ranks {
         } else if (group.equalsIgnoreCase("srmoderator")) {
             prefix = "§e[SrMod] §7";
         } else if (group.equalsIgnoreCase("builder")) {
-            prefix = "§a[Builder]";
+            prefix = "§a[Builder] §7";
         }
         return prefix;
     }

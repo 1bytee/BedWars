@@ -20,7 +20,7 @@ import java.util.List;
 
 public class TeamSelector implements Listener {
 
-    private ArrayList<Player> players = new ArrayList<>();
+    private List<Player> players = Lists.newArrayList();
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
@@ -35,8 +35,9 @@ public class TeamSelector implements Listener {
     }
 
     private void openInventory(Player p) {
-        if (players.contains(p))
+        if (players.contains(p)) {
             players.remove(p);
+        }
 
         Inventory inv = Bukkit.createInventory(null, 9, "§7Team-Selector");
 
@@ -114,24 +115,41 @@ public class TeamSelector implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player)) return;
+        if (!(e.getWhoClicked() instanceof Player)) {
+            return;
+        }
+
         Player p = (Player) e.getWhoClicked();
 
-        if (players.contains(p)) {
-            if (e.getCurrentItem() != null) {
-                e.setCancelled(true);
-                p.updateInventory();
+        if (players.contains(p) && e.getCurrentItem() != null) {
+            e.setCancelled(true);
+            p.updateInventory();
 
-                if (e.getCurrentItem().getDurability() == 3) {
-                    IceWars.getTeams().get(0).addPlayer(p);
-                } else if (e.getCurrentItem().getDurability() == 5) {
-                    IceWars.getTeams().get(1).addPlayer(p);
-                } else if (e.getCurrentItem().getDurability() == 6) {
-                    IceWars.getTeams().get(2).addPlayer(p);
-                } else if (e.getCurrentItem().getDurability() == 4) {
-                    IceWars.getTeams().get(3).addPlayer(p);
+            IceWars.getTeams().stream().filter(team -> players.contains(p)).forEach(team -> team.removePlayer(p));
+
+            int team = -1;
+
+            switch (e.getCurrentItem().getDurability()) {
+                case 3:
+                    team = 0;
+                    break;
+                case 5:
+                    team = 1;
+                    break;
+                case 6:
+                    team = 2;
+                    break;
+                case 4:
+                    team = 3;
+                    break;
+            }
+
+            if (team != -1) {
+                if (IceWars.getTeams().get(team).addPlayer(p)) {
+                    p.sendMessage(IceWars.PREFIX + "You joined Team " + IceWars.getTeams().get(team).getColor() + IceWars.getTeams().get(team).getName() + "§7.");
+                } else {
+                    p.sendMessage(IceWars.PREFIX + "Team " + IceWars.getTeams().get(team).getColor() + IceWars.getTeams().get(team).getName() + "§7 is §cfull§7!");
                 }
-
                 closeInventory(p);
             }
         }

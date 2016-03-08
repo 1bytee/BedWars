@@ -16,3 +16,5 @@ commands:
         description: switch worlds
     setitemspawn:
         description: set item spawn
+    stats:
+        description: get stats

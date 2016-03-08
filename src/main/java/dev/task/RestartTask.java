@@ -2,6 +2,7 @@ package dev.task;
 
 import dev.IceWars;
 import dev.util.Locations;
+import dev.util.Scoreboards;
 import dev.util.Team;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
@@ -19,8 +20,9 @@ public class RestartTask {
         if (IceWars.ITEM_TASK != null) {
             IceWars.ITEM_TASK.cancel();
         }
+        Scoreboards.doScoreboard();
         broadcast("The game has ended.");
-        for (Player p : Bukkit.getOnlinePlayers()) {
+        Bukkit.getOnlinePlayers().forEach(p -> {
             p.setFlying(false);
             p.setAllowFlight(false);
             p.getInventory().clear();
@@ -28,16 +30,19 @@ public class RestartTask {
             p.getActivePotionEffects().forEach(potionEffect -> p.removePotionEffect(potionEffect.getType()));
             p.setFireTicks(0);
             p.teleport(Locations.getLocation("spawn"));
-        }
+        });
         if (IceWars.getTeams().size() != 1) {
             broadcast("There was no winner.");
         } else {
             Team team = IceWars.getTeams().get(0);
             broadcast("Team " + team.getColor() + team.getName() + " §7has won the game.");
-            sendTitle(team.getColor() + team.getName(), "§7wins!");
+            sendTitle("§7Team " + team.getColor() + team.getName(), "§7wins!");
         }
         Bukkit.broadcastMessage("§cServer restarting in 10 seconds.");
-        Bukkit.getScheduler().scheduleSyncDelayedTask(IceWars.getInstance(), Bukkit::shutdown, 10 * 20L);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(IceWars.getInstance(), () -> {
+            Bukkit.getOnlinePlayers().forEach(o -> o.kickPlayer("§cServer is restarting..."));
+            Bukkit.shutdown();
+        }, 10 * 20L);
     }
 
     private static void broadcast(String message) {

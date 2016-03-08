@@ -1,5 +1,6 @@
 package dev.util;
 
+import dev.IceWars;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
@@ -27,7 +28,7 @@ public class Scoreboards {
         Team user = board.registerNewTeam("7user");
         user.setPrefix("§7");
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        Bukkit.getOnlinePlayers().forEach(player -> {
             String color = Ranks.getColor(player);
             if (color.equals("§4"))
                 admin.addEntry(player.getName());
@@ -45,11 +46,51 @@ public class Scoreboards {
                 builder.addEntry(player.getName());
             else
                 user.addEntry(player.getName());
-        }
+        });
 
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            p.setScoreboard(board);
-        }
+        Bukkit.getOnlinePlayers().forEach(p -> p.setScoreboard(board));
+    }
+
+    public static void doIngameScoreboard() {
+        Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+        Team blue = board.registerNewTeam("blue");
+        Team red = board.registerNewTeam("red");
+        Team green = board.registerNewTeam("green");
+        Team yellow = board.registerNewTeam("yellow");
+        Team noTeam = board.registerNewTeam("unlisted");
+        blue.setPrefix("§b");
+        red.setPrefix("§c");
+        green.setPrefix("§a");
+        yellow.setPrefix("§e");
+        noTeam.setPrefix("§7");
+
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            dev.util.Team team = IceWars.getTeam(p);
+            if (team == null) {
+                noTeam.addEntry(p.getName());
+            } else {
+                switch (team.getColor()) {
+                    case AQUA:
+                        blue.addEntry(p.getName());
+                        break;
+                    case GREEN:
+                        green.addEntry(p.getName());
+                        break;
+                    case RED:
+                        red.addEntry(p.getName());
+                        break;
+                    case YELLOW:
+                        yellow.addEntry(p.getName());
+                        break;
+                    default:
+                        noTeam.addEntry(p.getName());
+                        break;
+                }
+            }
+        });
+
+        Bukkit.getOnlinePlayers().forEach(p -> p.setScoreboard(board));
+
     }
 
 }

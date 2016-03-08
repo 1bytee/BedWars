@@ -2,7 +2,9 @@ package dev.tntpig;
 
 import lombok.SneakyThrows;
 import net.minecraft.server.v1_8_R3.*;
-import org.bukkit.Location;
+import net.minecraft.server.v1_8_R3.World;
+import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftTNTPrimed;
@@ -21,9 +23,13 @@ public class TNTPig extends EntityPig implements ITNTPig {
     private Player p;
     private TNTPrimed tnt;
 
+    public TNTPig(World world) {
+        super(world);
+    }
+
     @SneakyThrows
     public TNTPig(Location loc, Player p) {
-        super((World) loc.getWorld());
+        super(((CraftWorld) loc.getWorld()).getHandle());
         this.loc = loc;
         this.p = p;
 
@@ -75,4 +81,7 @@ public class TNTPig extends EntityPig implements ITNTPig {
         f.set(((CraftTNTPrimed) tnt).getHandle(), ((CraftEntity) source).getHandle());
     }
 
+    public Player getPlayer() {
+        return p;
+    }
 }

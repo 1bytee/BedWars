@@ -43,8 +43,6 @@ public class SetIceBlock implements CommandExecutor {
 
         Block b = p.getTargetBlock((Set<Material>) null, 10);
 
-        System.out.println(b);
-
         if (b.getType() == Material.PACKED_ICE) {
             save(b.getLocation(), type, map, team);
             p.sendMessage(IceWars.PREFIX + String.format("Spawn has been set. (%1s, %d, %2s)", type.name(), map, team));
