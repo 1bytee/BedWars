@@ -18,3 +18,5 @@ commands:
         description: set item spawn
     stats:
         description: get stats
+    clearentities:
+        description: clear all entities

@@ -15,7 +15,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TeamSelector implements Listener {
@@ -86,7 +85,7 @@ public class TeamSelector implements Listener {
 
             ItemStack red = new ItemStack(Material.STAINED_CLAY, 1, (short) 6);
             ItemMeta redMeta = red.getItemMeta();
-            redMeta.setDisplayName("§bRed Team");
+            redMeta.setDisplayName("§cRed Team");
             List<String> redLore = Lists.newArrayList();
             redLore.add(" ");
             IceWars.getTeams().get(2).getPlayers().forEach(player -> redLore.add("§7- §e" + player.getName()));
@@ -95,7 +94,7 @@ public class TeamSelector implements Listener {
 
             ItemStack yellow = new ItemStack(Material.STAINED_CLAY, 1, (short) 4);
             ItemMeta yellowMeta = blue.getItemMeta();
-            yellowMeta.setDisplayName("§aYellow Team");
+            yellowMeta.setDisplayName("§eYellow Team");
             List<String> yellowLore = Lists.newArrayList();
             yellowLore.add(" ");
             IceWars.getTeams().get(3).getPlayers().forEach(player -> yellowLore.add("§7- §e" + player.getName()));

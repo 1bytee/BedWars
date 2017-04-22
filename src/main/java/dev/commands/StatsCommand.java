@@ -7,7 +7,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class StatsCommand implements CommandExecutor {
+
+    private final SimpleDateFormat format = new SimpleDateFormat("dd.MM.YY HH:mm:ss [zzz]", Locale.ENGLISH);
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
@@ -42,11 +48,13 @@ public class StatsCommand implements CommandExecutor {
 
         PlayerStats stats = IceWars.STATS.get(name);
         sender.sendMessage(IceWars.PREFIX + "§e" + name + "'s §7Stats:");
-        sender.sendMessage(IceWars.PREFIX + "Kills: §e" + stats.getName());
+        sender.sendMessage(IceWars.PREFIX + "Kills: §e" + stats.getKills());
         sender.sendMessage(IceWars.PREFIX + "Deaths: §e" + stats.getDeaths());
+        sender.sendMessage(IceWars.PREFIX + "K/D: §e" + stats.getKD());
         sender.sendMessage(IceWars.PREFIX + "Victories: §e" + stats.getVictories());
         sender.sendMessage(IceWars.PREFIX + "Games played: §e" + stats.getGamesPlayed());
         sender.sendMessage(IceWars.PREFIX + "Ice blocks destroyed: §e" + stats.getDestroyedIceBlocks());
+        sender.sendMessage(IceWars.PREFIX + "Last updated: §e" + format.format(new Date(stats.getUpdated())));
         return true;
     }
 

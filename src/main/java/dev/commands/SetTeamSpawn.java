@@ -27,6 +27,11 @@ public class SetTeamSpawn implements CommandExecutor {
             return true;
         }
 
+        if (args.length < 3) {
+            p.sendMessage(IceWars.PREFIX + "Usage: §e/setteamspawn <TeamType> <Map> <Team>");
+            return true;
+        }
+
         TeamType type = TeamType.of(args[0]);
         if (type == null) {
             p.sendMessage(IceWars.PREFIX + "Unknown TeamType: §e" + args[0]);

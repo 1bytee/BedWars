@@ -4,18 +4,20 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.events.WorldListener;
-import dev.stats.PlayerStats;
-import dev.tntpig.TNTPigExecutor;
-import dev.tntpig.TNTPigRegister;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import dev.commands.*;
 import dev.events.BlockListener;
 import dev.events.PlayerListener;
 import dev.events.SpectatorListener;
+import dev.events.WorldListener;
 import dev.map.MapManager;
 import dev.map.MapReset;
+import dev.stats.PlayerStats;
 import dev.task.AbstractTask;
 import dev.task.WarmupTask;
+import dev.tntpig.TNTPigExecutor;
+import dev.tntpig.TNTPigRegister;
 import dev.util.*;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -30,17 +32,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class IceWars extends JavaPlugin {
 
@@ -53,7 +51,7 @@ public class IceWars extends JavaPlugin {
 
     public static final List<Player> INGAME = Lists.newArrayList(), SPECTATING = Lists.newArrayList();
     public static AbstractTask CURRENT_TASK, ITEM_TASK;
-    public static Location goldSpawn;
+    public static List<Location> goldSpawns = Lists.newArrayList();
 
     public static final Map<String, PlayerStats> STATS = Maps.newLinkedHashMap();
     public static final TNTPigRegister REGISTER = new TNTPigRegister();
@@ -88,6 +86,15 @@ public class IceWars extends JavaPlugin {
         SERVER = getConfig().getString("server");
         SETUPMODE = getConfig().getBoolean("setupMode");
 
+        MongoCollection<Document> collection = MongoConnection.getCollection("server", "serverinfo");
+        Document doc = new Document("name", SERVER)
+                .append("status", "ONLINE")
+                .append("type", "ICEWARS")
+                .append("state", 1)
+                .append("online", 0)
+                .append("max", 0);
+        collection.replaceOne(Filters.eq("name", SERVER), doc);
+
         registerEvents();
         registerCommands();
         MapManager.loadDefaultWorld();
@@ -97,23 +104,32 @@ public class IceWars extends JavaPlugin {
         } else {
             MapManager.loadAllWorlds();
             type = TeamType.T2x2;
-
-            for (int i = 0; i < type.getTeamSize(); i++) {
-                teams.add(new Team(colors[i]));
-            }
         }
 
         System.out.println("[IceWars] Features loaded.");
     }
 
+    @Override
+    public void onDisable() {
+        MongoCollection<Document> collection = MongoConnection.getCollection("server", "serverinfo");
+        Document doc = new Document("name", SERVER)
+                .append("status", "OFFLINE")
+                .append("type", "ICEWARS")
+                .append("state", 0)
+                .append("online", 0)
+                .append("max", 0);
+        collection.replaceOne(Filters.eq("name", SERVER), doc);
+    }
+
     public void load() {
+
         teams.clear();
 
         Document info = MongoConnection.info();
         type = TeamType.of(info.getString("teamType"));
-        MAP = info.getString("map");
+        MAPID = info.getInteger("map");
         MapManager.init();
-        MAPID = MapManager.getMapsByName().get(MAP);
+        MAP = MapManager.getMapsById().get(MAPID);
 
         if (type == null) {
             getServer().getPluginManager().disablePlugin(this);
@@ -125,9 +141,10 @@ public class IceWars extends JavaPlugin {
             teams.add(new Team(colors[i]));
         }
 
-        goldSpawn = Locations.goldSpawn();
+        goldSpawns = Locations.goldSpawns();
 
         //TODO fix this...
+        Bukkit.getWorlds().forEach(world -> world.setPVP(true));
         Bukkit.getWorlds().forEach(world -> world.getEntities().stream().filter(e -> e.getType() != EntityType.WITCH && e.getType() != EntityType.PLAYER).forEach(Entity::remove));
     }
 
@@ -180,6 +197,7 @@ public class IceWars extends JavaPlugin {
         getCommand("world").setExecutor(new WorldCommand());
         getCommand("setitemspawn").setExecutor(new SetItemSpawn());
         getCommand("stats").setExecutor(new StatsCommand());
+        getCommand("clearentities").setExecutor(new ClearEntities());
     }
 
     public static Team getTeam(Player p) {
@@ -212,12 +230,17 @@ public class IceWars extends JavaPlugin {
     }
 
     public static Team nextFreeTeam() {
+        Team lowest = null;
         for (Team team : teams) {
-            if (team.getPlayers().size() < type.getTeamSize()) {
-                return team;
+            if (team == null && team.getPlayers().size() != type.getTeamSize()) {
+                lowest = team;
+            } else {
+                if (team.getPlayers().size() < lowest.getPlayers().size() && team.getPlayers().size() != type.getTeamSize()) {
+                    lowest = team;
+                }
             }
         }
-        return new Team(ChatColor.BLACK);
+        return lowest == null ? new Team(ChatColor.BLACK) : lowest;
     }
 
     public static void setToSpectator(Player p) {
@@ -244,6 +267,8 @@ public class IceWars extends JavaPlugin {
 
         p.sendMessage(PREFIX + "You are now spectating.");
         p.sendMessage(PREFIX + "Use the compass to spectate other players!");
+
+        Scoreboards.doIngameScoreboard();
     }
 
     private static final Map<String, UUID> uuidMap = Maps.newHashMap();

@@ -4,13 +4,12 @@ import dev.IceWars;
 import dev.util.GameState;
 import dev.util.Locations;
 import dev.util.Scoreboards;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
+import net.minecraft.server.v1_9_R1.IChatBaseComponent;
+import net.minecraft.server.v1_9_R1.PacketPlayOutTitle;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 public class WarmupTask extends AbstractTask {
 
@@ -51,6 +50,11 @@ public class WarmupTask extends AbstractTask {
 
             IceWars.getTeams().forEach(team -> team.getPlayers().forEach(p -> p.teleport(Locations.getSpawn(team))));
             cancel();
+
+            IceWars.STATS.forEach((name, stats) -> {
+                stats.addGamesPlayed();
+                IceWars.STATS.put(name, stats);
+            });
 
             Scoreboards.doIngameScoreboard();
             IceWars.CURRENT_TASK = new IngameTask();

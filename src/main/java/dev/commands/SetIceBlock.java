@@ -11,11 +11,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Set;
 
 public class SetIceBlock implements CommandExecutor {
@@ -29,6 +27,11 @@ public class SetIceBlock implements CommandExecutor {
 
         if (!p.hasPermission("icewars.admin")) {
             p.sendMessage(IceWars.PREFIX + "You don't have permission to execute this command.");
+            return true;
+        }
+
+        if (args.length < 3) {
+            p.sendMessage(IceWars.PREFIX + "Usage: §e/seticeblock <TeamType> <Map> <Team>");
             return true;
         }
 

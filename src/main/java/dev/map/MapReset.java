@@ -64,9 +64,7 @@ public class MapReset {
             for (File subfile : file.listFiles())
                 if (!delete(subfile))
                     return false;
-        if (!file.delete())
-            return false;
-        return true;
+        return file.delete();
     }
 
     private static void copyDir(File source, File target) throws IOException {

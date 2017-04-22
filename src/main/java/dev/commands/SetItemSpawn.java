@@ -15,6 +15,8 @@ import java.io.File;
 
 public class SetItemSpawn implements CommandExecutor {
 
+    private int goldSpawn = 1;
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (!(sender instanceof Player))
@@ -24,6 +26,11 @@ public class SetItemSpawn implements CommandExecutor {
 
         if (!p.hasPermission("icewars.admin")) {
             p.sendMessage(IceWars.PREFIX + "You don't have permission to execute this command.");
+            return true;
+        }
+
+        if (args.length < 3) {
+            p.sendMessage(IceWars.PREFIX + "Usage: §e/setitemspawn <TeamType> <Map> <gold|Team> [bronze/silver]");
             return true;
         }
 
@@ -57,7 +64,7 @@ public class SetItemSpawn implements CommandExecutor {
 
     @SneakyThrows
     public void save(Location loc, TeamType type, int map, String itemType) {
-        String path = map + "." + itemType + ".";
+        String path = map + "." + itemType + "." + goldSpawn + ".";
         File f = new File(IceWars.getInstance().getDataFolder(), type.name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
         cfg.set(path + "X", loc.getX());
@@ -65,6 +72,7 @@ public class SetItemSpawn implements CommandExecutor {
         cfg.set(path + "Z", loc.getZ());
         cfg.set(path + "W", loc.getWorld().getName());
         cfg.save(f);
+        goldSpawn++;
     }
 
     @SneakyThrows

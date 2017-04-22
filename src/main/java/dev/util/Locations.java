@@ -1,5 +1,6 @@
 package dev.util;
 
+import com.google.common.collect.Lists;
 import dev.IceWars;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
@@ -10,6 +11,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.NumberConversions;
 
 import java.io.File;
+import java.util.List;
 
 public class Locations {
 
@@ -61,14 +63,22 @@ public class Locations {
         return new Location(world, x, y, z, yaw, pitch);
     }
 
-    public static Location goldSpawn() {
+    public static List<Location> goldSpawns() {
         String path = IceWars.MAPID + ".gold.";
         File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
-        int x = cfg.getInt(path + "X");
-        int y = cfg.getInt(path + "Y");
-        int z = cfg.getInt(path + "Z");
-        World world = Bukkit.getWorld(cfg.getString(path + "W"));
-        return new Location(world, x, y, z);
+        List<Location> locations = Lists.newArrayList();
+        for (int i = 1; i <= 10; i++) {
+            if (!cfg.isSet(path + i + ".X")) {
+                break;
+            }
+            int x = cfg.getInt(path + i + ".X");
+            int y = cfg.getInt(path + i + ".Y");
+            int z = cfg.getInt(path + i + ".Z");
+            World world = Bukkit.getWorld(cfg.getString(path + "W"));
+            Location loc = new Location(world, x, y, z);
+            locations.add(loc);
+        }
+        return locations;
     }
 }

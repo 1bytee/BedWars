@@ -3,11 +3,11 @@ package dev;
 import com.google.common.collect.Lists;
 import lombok.Builder;
 import lombok.Getter;
-import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.server.v1_9_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -25,6 +25,8 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import java.util.List;
 
 import static org.bukkit.Material.*;
+
+import org.bukkit.Material;
 
 public class WitchMenu implements Listener {
 
@@ -282,7 +284,7 @@ public class WitchMenu implements Listener {
         inv.addTrade(getItem(IRON_INGOT, 7, "§7Silver"), getItem(FLINT_AND_STEEL, "§cFlint And Steel"));
         inv.addTrade(getItem(GOLD_INGOT, 3, "§6Gold"), getItem(TNT, "§cTNT"));
         inv.addTrade(getItem(GOLD_INGOT, 13, "§6Gold"), getItem(ENDER_PEARL, "§cEnder Pearl"));
-        inv.addTrade(getItem(CLAY_BRICK, 64, "§cBronze"), getItem(MONSTER_EGG, "§cJihadi", 90));
+      //  inv.addTrade(getItem(CLAY_BRICK, 64, "§cBronze"), getItem(MONSTER_EGG, "§cJihadi", 90));
         inv.openTrade(p);
     }
 
@@ -317,16 +319,18 @@ public class WitchMenu implements Listener {
             final EntityHuman e = ((CraftPlayer) who).getHandle();
             e.openTrade(new IMerchant() {
                 @Override
+                public void setTradingPlayer(EntityHuman entityHuman) {
+
+                }
+
+                @Override
+                public EntityHuman t_() {
+                    return e;
+                }
+
+                @Override
                 public MerchantRecipeList getOffers(EntityHuman arg0) {
                     return l;
-                }
-
-                @Override
-                public void a_(net.minecraft.server.v1_8_R3.ItemStack arg0) {
-                }
-
-                @Override
-                public void a_(EntityHuman arg0) {
                 }
 
                 @Override
@@ -335,12 +339,12 @@ public class WitchMenu implements Listener {
                 }
 
                 @Override
-                public EntityHuman v_() {
-                    return e;
+                public void a(MerchantRecipe arg0) {
                 }
 
                 @Override
-                public void a(MerchantRecipe arg0) {
+                public void a(net.minecraft.server.v1_9_R1.ItemStack itemStack) {
+
                 }
             });
         }

@@ -30,6 +30,7 @@ public class PlayerStats {
     private int victories = 0;
     private int gamesPlayed = 0;
     private int destroyedIceBlocks = 0;
+    private long updated;
     private String name;
 
     public PlayerStats(Player p) {
@@ -47,29 +48,32 @@ public class PlayerStats {
 
     public void addKill() {
         setKills(getKills() + 1);
+        updated = System.currentTimeMillis();
     }
 
     public void addDeath() {
         setDeaths(getDeaths() + 1);
+        updated = System.currentTimeMillis();
     }
 
     public void addVictory() {
         setVictories(getVictories() + 1);
+        updated = System.currentTimeMillis();
     }
 
     public void addGamesPlayed() {
         setGamesPlayed(getGamesPlayed() + 1);
+        updated = System.currentTimeMillis();
     }
 
-    public void addDestroyedBed() {
+    public void addDestroyedIceBlock() {
         setDestroyedIceBlocks(getDestroyedIceBlocks() + 1);
+        updated = System.currentTimeMillis();
     }
-
     public boolean loadStats() {
         MongoCollection<Document> collection = MongoConnection.getCollection("icewars", "stats");
-
         Document doc = collection.find(Filters.eq("uuid", uuid.toString())).first();
-
+        updated = System.currentTimeMillis();
         if (doc != null) {
             kills = doc.getInteger("kills");
             deaths = doc.getInteger("deaths");
@@ -96,6 +100,5 @@ public class PlayerStats {
         } else {
             collection.replaceOne(Filters.eq("uuid", uuid.toString()), doc);
         }
-
     }
 }

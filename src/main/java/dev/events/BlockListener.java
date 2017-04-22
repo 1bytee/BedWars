@@ -1,6 +1,7 @@
 package dev.events;
 
 import dev.IceWars;
+import dev.stats.PlayerStats;
 import dev.util.GameState;
 import dev.util.Team;
 import org.bukkit.Bukkit;
@@ -11,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +46,9 @@ public class BlockListener implements Listener {
                 }
 
                 Bukkit.broadcastMessage(IceWars.PREFIX + "Team " + nearestTeam.getColor() + nearestTeam.getName() + "§7's ice block has been destroyed.");
+                PlayerStats stats = IceWars.STATS.get(p.getName());
+                stats.addDestroyedIceBlock();
+                IceWars.STATS.put(p.getName(), stats);
             } else {
                 if (!materials.contains(mat)) {
                     e.setCancelled(true);
@@ -65,6 +70,7 @@ public class BlockListener implements Listener {
         if (IceWars.INGAME.contains(p)) {
             if (e.getBlock().getType() == Material.TNT) {
                 e.setCancelled(true);
+                p.getInventory().remove(new ItemStack(Material.TNT));
                 e.getBlock().getWorld().spawnEntity(e.getBlock().getLocation(), EntityType.PRIMED_TNT);
             }
         }

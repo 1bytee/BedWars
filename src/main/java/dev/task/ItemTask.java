@@ -21,7 +21,7 @@ public class ItemTask extends AbstractTask {
         if (gold < 34) {
             gold++;
         } else {
-            IceWars.goldSpawn.getWorld().dropItemNaturally(IceWars.goldSpawn, getItem(GOLD_INGOT, "§6Gold"));
+            IceWars.goldSpawns.forEach(location -> location.getWorld().dropItemNaturally(location, getItem(GOLD_INGOT, "§6Gold")));
             gold = 0;
         }
         if (iron < 8) {

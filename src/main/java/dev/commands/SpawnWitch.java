@@ -26,10 +26,10 @@ public class SpawnWitch implements CommandExecutor {
             return true;
         }
 
-
         Witch witch = p.getWorld().spawn(p.getLocation(), Witch.class);
         witch.setCustomName("§eShopkeeper");
         witch.setCustomNameVisible(true);
+        witch.setRemoveWhenFarAway(false);
 
         EntityWitch nmsWitch = ((CraftWitch) witch).getHandle();
 

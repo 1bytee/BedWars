@@ -8,6 +8,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.stream.Collectors;
+
 public class WorldCommand implements CommandExecutor {
 
     @Override
@@ -23,11 +25,8 @@ public class WorldCommand implements CommandExecutor {
         }
 
         if (args.length != 1) {
-            String worlds = "";
-            for (World world1 : Bukkit.getWorlds()) {
-                worlds += world1.getName() + ", ";
-            }
-            p.sendMessage(IceWars.PREFIX + "Available worlds: §e" + worlds.substring(0, worlds.length() - 2));
+            p.sendMessage(IceWars.PREFIX + "Usage: §e/world <Name>");
+            p.sendMessage(IceWars.PREFIX + "Available worlds: §e" + Bukkit.getWorlds().stream().map(World::getName).collect(Collectors.joining(", ")));
             return true;
         }
 
@@ -35,12 +34,7 @@ public class WorldCommand implements CommandExecutor {
 
         if (world == null) {
             p.sendMessage(IceWars.PREFIX + "World " + args[0] + " doesn't exist.");
-
-            String worlds = "";
-            for (World world1 : Bukkit.getWorlds()) {
-                worlds += world1.getName() + ", ";
-            }
-            p.sendMessage(IceWars.PREFIX + "Available worlds: §e" + worlds.substring(0, worlds.length() - 2));
+            p.sendMessage(IceWars.PREFIX + "Available worlds: §e" + Bukkit.getWorlds().stream().map(World::getName).collect(Collectors.joining(", ")));
             return true;
         }
 

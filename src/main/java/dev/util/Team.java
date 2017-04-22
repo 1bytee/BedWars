@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import dev.IceWars;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -14,7 +15,8 @@ import java.io.File;
 import java.util.List;
 
 @Getter
-@EqualsAndHashCode(callSuper = false, exclude = {"players", "iceBlock"})
+@EqualsAndHashCode(exclude = {"players", "iceBlock"})
+@ToString
 public class Team {
 
     private List<Player> players;
@@ -64,7 +66,7 @@ public class Team {
     }
 
     private static Location silverSpawn(Team team) {
-        String path = IceWars.MAPID + ".silver." + team.name + ".";
+        String path = IceWars.MAPID + "." + team.name + ".silver.";
         File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
         int x = cfg.getInt(path + "X");
@@ -75,7 +77,7 @@ public class Team {
     }
 
     private static Location bronzeSpawn(Team team) {
-        String path = IceWars.MAPID + ".bronze." + team.name + ".";
+        String path = IceWars.MAPID + "." + team.name + ".bronze.";
         File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
         int x = cfg.getInt(path + "X");
@@ -86,7 +88,9 @@ public class Team {
     }
 
     private static Block iceBlock(Team team) {
+        System.out.println(team);
         String path = IceWars.MAPID + "." + team.name + ".iceblock.";
+        System.out.println(path);
         File f = new File(IceWars.getInstance().getDataFolder(), IceWars.getType().name().toLowerCase() + ".yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
         int x = cfg.getInt(path + "X");
